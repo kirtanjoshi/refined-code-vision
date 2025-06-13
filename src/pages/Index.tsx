@@ -1,5 +1,5 @@
 
-import ThreeBackground from '@/components/ThreeBackground';
+import { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import Hero from '@/components/Hero';
 import About from '@/components/About';
@@ -10,19 +10,36 @@ import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 
 const Index = () => {
+  const [activeSection, setActiveSection] = useState('hero');
+
+  const renderActiveSection = () => {
+    switch (activeSection) {
+      case 'hero':
+        return <Hero />;
+      case 'about':
+        return <About />;
+      case 'services':
+        return <Services />;
+      case 'testimonials':
+        return <Testimonials />;
+      case 'faq':
+        return <FAQ />;
+      case 'contact':
+        return <Contact />;
+      default:
+        return <Hero />;
+    }
+  };
+
   return (
-    <div className="min-h-screen custom-scrollbar">
-      <ThreeBackground />
-      <Navigation />
-      <main>
-        <Hero />
-        <About />
-        <Services />
-        <Testimonials />
-        <FAQ />
-        <Contact />
+    <div className="h-screen overflow-hidden bg-black">
+      <Navigation activeSection={activeSection} setActiveSection={setActiveSection} />
+      <main className="h-full">
+        <div className="transition-all duration-700 ease-in-out transform">
+          {renderActiveSection()}
+        </div>
       </main>
-      <Footer />
+      {activeSection === 'contact' && <Footer />}
     </div>
   );
 };

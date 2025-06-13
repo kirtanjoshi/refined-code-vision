@@ -1,45 +1,26 @@
 
-import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
+import { Menu, X, Home, User, Briefcase, MessageSquare, HelpCircle, Mail } from 'lucide-react';
 
-const Navigation = () => {
+interface NavigationProps {
+  activeSection: string;
+  setActiveSection: (section: string) => void;
+}
+
+const Navigation = ({ activeSection, setActiveSection }: NavigationProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('hero');
 
   const navItems = [
-    { id: 'hero', label: 'Home' },
-    { id: 'about', label: 'About' },
-    { id: 'services', label: 'Services' },
-    { id: 'testimonials', label: 'Testimonials' },
-    { id: 'contact', label: 'Contact' },
+    { id: 'hero', label: 'Home', icon: Home },
+    { id: 'about', label: 'About', icon: User },
+    { id: 'services', label: 'Services', icon: Briefcase },
+    { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
+    { id: 'faq', label: 'FAQ', icon: HelpCircle },
+    { id: 'contact', label: 'Contact', icon: Mail },
   ];
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = navItems.map(item => item.id);
-      const currentSection = sections.find(section => {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          return rect.top <= 100 && rect.bottom >= 100;
-        }
-        return false;
-      });
-      
-      if (currentSection) {
-        setActiveSection(currentSection);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleNavClick = (sectionId: string) => {
+    setActiveSection(sectionId);
     setIsOpen(false);
   };
 
@@ -48,26 +29,35 @@ const Navigation = () => {
       {/* Desktop Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
         <div className="max-w-7xl mx-auto">
-          <div className="glass-card px-6 py-3">
-            <div className="flex items-center justify-between">
-              <div className="text-xl font-light text-white">
+          <div className="glass-card px-6 py-3 relative overflow-hidden">
+            <div className="absolute inset-0 animated-bg"></div>
+            <div className="relative flex items-center justify-between">
+              <div className="text-xl font-light text-white cursor-pointer hover:scale-105 transition-transform duration-300"
+                   onClick={() => handleNavClick('hero')}>
                 <span className="text-gradient">ALEX</span> DEVELOPER
               </div>
               
-              <div className="hidden md:flex items-center space-x-8">
-                {navItems.map((item) => (
+              <div className="hidden md:flex items-center space-x-2">
+                {navItems.map((item, index) => (
                   <button
                     key={item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    className={`relative px-3 py-2 text-sm font-light transition-all duration-300 ${
+                    onClick={() => handleNavClick(item.id)}
+                    className={`nav-item group relative px-4 py-2 text-sm font-light transition-all duration-300 rounded-lg ${
                       activeSection === item.id 
-                        ? 'text-primary' 
-                        : 'text-white/70 hover:text-white'
+                        ? 'text-primary bg-white/10' 
+                        : 'text-white/70 hover:text-white hover:bg-white/5'
                     }`}
+                    style={{ 
+                      animationDelay: `${index * 0.1}s`,
+                      animation: 'slideIn 0.5s ease-out backwards'
+                    }}
                   >
-                    {item.label}
+                    <div className="flex items-center gap-2">
+                      <item.icon size={16} className="group-hover:scale-110 transition-transform duration-200" />
+                      <span>{item.label}</span>
+                    </div>
                     {activeSection === item.id && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/50 rounded-full" />
+                      <div className="absolute bottom-0 left-0 right-0 nav-indicator" />
                     )}
                   </button>
                 ))}
@@ -75,9 +65,12 @@ const Navigation = () => {
 
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden p-2 text-white"
+                className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-105"
               >
-                {isOpen ? <X size={24} /> : <Menu size={24} />}
+                <div className="relative w-6 h-6">
+                  <Menu size={24} className={`absolute inset-0 transition-all duration-300 ${isOpen ? 'opacity-0 rotate-45' : 'opacity-100 rotate-0'}`} />
+                  <X size={24} className={`absolute inset-0 transition-all duration-300 ${isOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-45'}`} />
+                </div>
               </button>
             </div>
           </div>
@@ -85,30 +78,38 @@ const Navigation = () => {
       </nav>
 
       {/* Mobile Navigation Drawer */}
-      <div className={`fixed inset-0 z-40 md:hidden transition-all duration-300 ${
+      <div className={`fixed inset-0 z-40 md:hidden transition-all duration-500 ${
         isOpen ? 'visible' : 'invisible'
       }`}>
-        <div className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
+        <div className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 ${
           isOpen ? 'opacity-100' : 'opacity-0'
         }`} onClick={() => setIsOpen(false)} />
         
-        <div className={`absolute right-0 top-0 h-full w-80 max-w-[80vw] transition-transform duration-300 ${
+        <div className={`absolute right-0 top-0 h-full w-80 max-w-[80vw] transition-all duration-500 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}>
-          <div className="h-full glass-card rounded-l-3xl border-r-0">
-            <div className="p-6 pt-20">
-              <div className="space-y-6">
-                {navItems.map((item) => (
+          <div className="h-full glass-card rounded-l-3xl border-r-0 relative overflow-hidden">
+            <div className="absolute inset-0 animated-bg"></div>
+            <div className="relative p-6 pt-20">
+              <div className="space-y-4">
+                {navItems.map((item, index) => (
                   <button
                     key={item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    className={`block w-full text-left px-4 py-3 rounded-xl transition-all duration-300 ${
+                    onClick={() => handleNavClick(item.id)}
+                    className={`block w-full text-left px-4 py-4 rounded-xl transition-all duration-300 group ${
                       activeSection === item.id
-                        ? 'bg-white/10 text-primary'
-                        : 'text-white/70 hover:text-white hover:bg-white/5'
+                        ? 'bg-white/20 text-primary scale-105'
+                        : 'text-white/70 hover:text-white hover:bg-white/10 hover:scale-102'
                     }`}
+                    style={{ 
+                      animationDelay: `${index * 0.1}s`,
+                      animation: isOpen ? 'slideIn 0.5s ease-out backwards' : 'none'
+                    }}
                   >
-                    {item.label}
+                    <div className="flex items-center gap-3">
+                      <item.icon size={20} className="group-hover:scale-110 transition-transform duration-200" />
+                      <span className="font-medium">{item.label}</span>
+                    </div>
                   </button>
                 ))}
               </div>
